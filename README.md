@@ -1,7 +1,7 @@
 # 8051.sim — Online 8051 Microcontroller Simulator
 
 ![Vercel](https://img.shields.io/badge/deployed%20on-Vercel-black?logo=vercel)
-![License](https://img.shields.io/github/license/s2sofficial/8051sim)
+![License](https://img.shields.io/github/license/S2Sofficial/8051sim)
 ![Issues](https://img.shields.io/github/issues/s2sofficial/8051sim)
 ![Stars](https://img.shields.io/github/stars/s2sofficial/8051sim?style=social)
 ![Contributors](https://img.shields.io/github/contributors/s2sofficial/8051sim)
