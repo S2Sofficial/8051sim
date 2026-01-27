@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Save, Play, FileCode, Activity, AlertCircle, CheckCircle, Info, Cpu, List, Binary, StepForward, RotateCcw, Pause, Layers, Zap, X, Download, BookOpen, Copy, Check, Moon, Sun, History } from 'lucide-react';
+import { Analytics } from '@vercel/analytics/react';
 
 // Imports from our new folder structure
 import { THEMES, SFR_MAP } from './data/constants';
@@ -230,6 +231,7 @@ export default function App() {
             </div>
         </div>
       </main>
+      <Analytics />
     </div>
   );
 }
