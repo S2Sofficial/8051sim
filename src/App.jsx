@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Save, Play, FileCode, Activity, AlertCircle, CheckCircle, Info, Cpu, List, Binary, StepForward, RotateCcw, Pause, Layers, Zap, X, Download, BookOpen, Copy, Check, Moon, Sun, History } from 'lucide-react';
+import { Save, Play, Activity, AlertCircle, CheckCircle, Info, Cpu, List, Binary, StepForward, RotateCcw, Pause, Layers, Zap, X, Download, BookOpen, Copy, Check, Moon, Sun, History } from 'lucide-react';
 import { Analytics } from '@vercel/analytics/react';
 
 // Imports from our new folder structure
@@ -7,7 +7,7 @@ import { THEMES, SFR_MAP } from './data/constants';
 import { DEFAULT_CODE } from './data/snippets';
 import { parseValue, parseLine } from './utils/helpers';
 import LandingPage from './components/LandingPage';
-import SyntaxHighlighter from './components/SyntaxHighlighter';
+import CodeEditor from './components/CodeEditor';
 import RegisterView from './components/RegisterView';
 import TraceView from './components/TraceView';
 import GPIOView from './components/GPIOView';
@@ -23,7 +23,8 @@ export default function App() {
 
   useEffect(() => { localStorage.setItem('8051_theme', JSON.stringify(isDarkMode)); }, [isDarkMode]);
 
-  const [code, setCode] = useState(DEFAULT_CODE);
+  const codeRef = useRef(DEFAULT_CODE);
+  const isModifiedRef = useRef(false);
   const [cpu, setCpu] = useState({ A: 0, B: 0, PSW: 0, SP: 0x07, PC: 0, DPTR: 0, R: [0,0,0,0,0,0,0,0], RAM: new Array(256).fill(0), cycles: 0, stack: [] });
   const [isRunning, setIsRunning] = useState(false);
   const [parsedLines, setParsedLines] = useState([]);
@@ -35,19 +36,23 @@ export default function App() {
   const [showSnippets, setShowSnippets] = useState(false);
   const [traceLog, setTraceLog] = useState([]);
 
-  const textAreaRef = useRef(null);
-  const lineNumbersRef = useRef(null);
   const intervalRef = useRef(null);
-  const handleScroll = () => { if (textAreaRef.current && lineNumbersRef.current) lineNumbersRef.current.scrollTop = textAreaRef.current.scrollTop; };
+  const handleCodeChange = useCallback((nextCode) => {
+    codeRef.current = nextCode;
+    if (!isModifiedRef.current) {
+      isModifiedRef.current = true;
+      setIsModified(true);
+    }
+  }, []);
   const handleDownload = () => {
-    const blob = new Blob([code], { type: 'text/plain' });
+    const blob = new Blob([codeRef.current], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url; link.download = 'code.asm';
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
   };
   const compileHex = () => {
-    const lines = code.split('\n');
+    const lines = codeRef.current.split('\n');
     let location = 0;
     const output = [];
     lines.forEach(line => {
@@ -62,7 +67,7 @@ export default function App() {
       const initRam = new Array(256).fill(0);
       initRam[0x80]=0xFF; initRam[0x90]=0xFF; initRam[0xA0]=0xFF; initRam[0xB0]=0xFF;
       
-      const lines = code.split('\n');
+      const lines = codeRef.current.split('\n');
       const pLines = [];
       const newLabels = {};
       lines.forEach((line, i) => {
@@ -82,8 +87,10 @@ export default function App() {
 
       setCpu({ A: 0, B: 0, PSW: 0, SP: 0x07, PC: pc, DPTR: 0, R: [0,0,0,0,0,0,0,0], RAM: initRam, cycles: 0, stack: [] });
       setIsRunning(false);
-      setErrorMsg(null); setIsModified(false);
-  }, [code]);
+      setErrorMsg(null);
+      isModifiedRef.current = false;
+      setIsModified(false);
+  }, []);
 
   const stepSim = () => {
       if(isModified) { alert("Code changed. Please Reset simulation."); return; }
@@ -168,24 +175,14 @@ export default function App() {
       <SnippetsModal isOpen={showSnippets} onClose={() => setShowSnippets(false)} isDark={isDarkMode} />
 
       <main className="flex-1 overflow-hidden p-2 lg:p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className={`flex flex-col ${theme.card} rounded-lg shadow-lg border ${theme.border} overflow-hidden relative h-[50vh] lg:h-auto`}>
-            <div className={`absolute top-0 left-0 w-full h-8 ${theme.header} border-b ${theme.border} flex items-center px-4 text-xs font-mono ${theme.textMuted} z-10`}>
-                <FileCode className="w-3 h-3 mr-2" /> EDITOR {errorMsg && <span className="ml-auto text-red-500 flex items-center gap-1"><AlertCircle className="w-3 h-3"/> {errorMsg}</span>}
-            </div>
-            <div className="flex-1 relative mt-8 overflow-hidden group">
-                <div ref={lineNumbersRef} className={`absolute left-0 top-0 bottom-0 w-12 ${theme.editorGutter} ${theme.textMuted} text-right pr-3 pt-4 select-none border-r ${theme.border} overflow-hidden text-sm font-mono leading-6`}>
-                    {code.split('\n').map((_, i) => ( <div key={i} className={`relative ${cpu.PC === i ? `${theme.accent} font-bold` : ''}`}>{cpu.PC === i && <div className={`absolute right-0 top-1.5 w-1.5 h-1.5 rounded-full translate-x-1/2 bg-current`}></div>}{i + 1}</div>))}
-                    <div className="h-48"></div> 
-                </div>
-                <div className="absolute left-12 top-0 right-0 bottom-0 h-full overflow-auto" onScroll={handleScroll} ref={textAreaRef}>
-                    <div className="relative min-h-full">
-                         <SyntaxHighlighter code={code} isDark={isDarkMode} />
-                         <textarea value={code} onChange={(e) => { setCode(e.target.value); setIsModified(true); }} className={`absolute top-0 left-0 w-full h-full p-4 pl-4 bg-transparent text-transparent ${theme.highlightCaret} whitespace-pre font-mono text-sm leading-6 outline-none resize-none border-none z-10 selection:bg-[#b58900]/20`} spellCheck="false" autoComplete="off"/>
-                         <div className="h-48"></div> 
-                    </div>
-                </div>
-            </div>
-        </div>
+        <CodeEditor
+          initialCode={codeRef.current}
+          onCodeChange={handleCodeChange}
+          theme={theme}
+          isDarkMode={isDarkMode}
+          pc={cpu.PC}
+          errorMsg={errorMsg}
+        />
 
         <div className="flex flex-col gap-4 overflow-hidden h-[50vh] lg:h-auto">
             {view === 'sim' && (
