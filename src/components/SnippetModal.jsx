@@ -37,7 +37,7 @@ const SnippetsModal = ({ isOpen, onClose, isDark }) => {
     };
     return (
         <div className={`fixed inset-0 z-50 flex items-center justify-center ${modalTheme.modalOverlay} p-4`}>
-            <div className={`w-full max-w-4xl rounded-lg shadow-2xl overflow-hidden flex flex-col max-h-[85vh] h-150 ${modalTheme.bg}`}>
+            <div className={`w-full max-w-4xl rounded-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh] ${modalTheme.bg}`}>
                 <div className={`p-4 border-b flex justify-between items-center ${modalTheme.header} ${modalTheme.border}`}>
                     <h2 className={`text-lg font-bold flex items-center gap-2 ${modalTheme.text}`}>
                         <BookOpen className="w-5 h-5"/> Code Snippets
@@ -47,8 +47,8 @@ const SnippetsModal = ({ isOpen, onClose, isDark }) => {
                     </button>
                 </div>
                 
-                <div className="flex flex-1 overflow-hidden">
-                    <div className={`w-64 border-r overflow-y-auto ${modalTheme.bg} ${modalTheme.border}`}>
+                <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
+                    <div className={`w-full md:w-64 border-b md:border-b-0 md:border-r overflow-y-auto max-h-40 md:max-h-none ${modalTheme.bg} ${modalTheme.border}`}>
                         {SNIPPET_CATEGORIES.map((cat, catIdx) => (
                             <div key={catIdx}>
                                 <div className={`px-3 py-2 text-xs font-bold uppercase tracking-wider ${modalTheme.textMuted} bg-opacity-10 bg-black/5 mt-2 first:mt-0`}>
