@@ -37,6 +37,21 @@ export default function App() {
   const [traceLog, setTraceLog] = useState([]);
 
   const intervalRef = useRef(null);
+  const FLAG_CY = 0x80;
+  const FLAG_AC = 0x40;
+  const FLAG_F0 = 0x20;
+  const FLAG_RS1 = 0x10;
+  const FLAG_RS0 = 0x08;
+  const FLAG_OV = 0x04;
+  const FLAG_P = 0x01;
+
+  const setFlag = (psw, flag, value) => (value ? (psw | flag) : (psw & ~flag));
+  const updateParity = (psw, acc) => {
+    let ones = 0;
+    for (let i = 0; i < 8; i += 1) ones ^= (acc >> i) & 1;
+    return setFlag(psw, FLAG_P, ones === 1);
+  };
+
   const handleCodeChange = useCallback((nextCode) => {
     codeRef.current = nextCode;
     if (!isModifiedRef.current) {
@@ -101,7 +116,7 @@ export default function App() {
           if (!line || !line.mnemonic || line.mnemonic === 'ORG' || line.mnemonic === 'EQU' || line.mnemonic === 'DB') return { ...next, PC: next.PC + 1 };
 
           const newTrace = { pc: prev.PC, inst: line.mnemonic + ' ' + line.operands.join(','), A: prev.A.toString(16).toUpperCase().padStart(2,'0'), R: prev.R.map(r => r.toString(16).toUpperCase()) };
-          setTraceLog(old => [newTrace, ...old].slice(0, 50)); 
+          setTraceLog(old => [newTrace, ...old]); 
 
           try {
               const op1 = line.operands[0]; const op2 = line.operands[1];
@@ -121,19 +136,84 @@ export default function App() {
                   else if (op === 'DPTR') next.DPTR = val & 0xFFFF;
                   else { let addr = SFR_MAP[op] !== undefined ? SFR_MAP[op] : parseValue(op, labels); if (addr >= 0 && addr <= 255) next.RAM[addr] = val; }
               };
+              let parityUpdated = false;
+              let psw = next.PSW;
               switch (line.mnemonic) {
-                  case 'MOV': if(op1 === 'DPTR') next.DPTR = parseValue(op2, labels); else setVal(op1, getVal(op2)); next.PC++; next.cycles += 1; break;
-                  case 'ADD': next.A = (next.A + getVal(op2)) & 0xFF; next.PC++; next.cycles += 1; break;
-                  case 'SUBB': next.A = (next.A - getVal(op2)) & 0xFF; next.PC++; next.cycles += 1; break;
-                  case 'INC': if(op1 === 'DPTR') next.DPTR = (next.DPTR + 1) & 0xFFFF; else setVal(op1, getVal(op1) + 1); next.PC++; next.cycles += 1; break;
-                  case 'DEC': setVal(op1, (getVal(op1) - 1 + 256) & 0xFF); next.PC++; next.cycles += 1; break;
-                  case 'CPL': if (op1.includes('.')) { const [port, bit] = op1.split('.'); const addr = SFR_MAP[port] || parseValue(port); const mask = 1 << parseInt(bit); next.RAM[addr] ^= mask; } else { setVal(op1, ~getVal(op1)); } next.PC++; next.cycles += 1; break;
+                  case 'MOV': {
+                      if(op1 === 'DPTR') next.DPTR = parseValue(op2, labels);
+                      else setVal(op1, getVal(op2));
+                      if (op1 === 'A') {
+                        next.PSW = updateParity(next.PSW, next.A);
+                        parityUpdated = true;
+                      }
+                      next.PC++; next.cycles += 1; break;
+                  }
+                  case 'ADD': {
+                      const acc = next.A;
+                      const val = getVal(op2);
+                      const sum = acc + val;
+                      next.A = sum & 0xFF;
+                      psw = setFlag(psw, FLAG_CY, sum > 0xFF);
+                      psw = setFlag(psw, FLAG_AC, ((acc & 0x0F) + (val & 0x0F)) > 0x0F);
+                      psw = setFlag(psw, FLAG_OV, ((~(acc ^ val) & (acc ^ sum)) & 0x80) !== 0);
+                      next.PSW = updateParity(psw, next.A);
+                      parityUpdated = true;
+                      next.PC++; next.cycles += 1; break;
+                  }
+                  case 'SUBB': {
+                      const acc = next.A;
+                      const val = getVal(op2);
+                      const carry = (psw & FLAG_CY) ? 1 : 0;
+                      const diff = acc - val - carry;
+                      next.A = diff & 0xFF;
+                      psw = setFlag(psw, FLAG_CY, diff < 0);
+                      psw = setFlag(psw, FLAG_AC, ((acc & 0x0F) - (val & 0x0F) - carry) < 0);
+                      psw = setFlag(psw, FLAG_OV, (((acc ^ val) & (acc ^ diff)) & 0x80) !== 0);
+                      next.PSW = updateParity(psw, next.A);
+                      parityUpdated = true;
+                      next.PC++; next.cycles += 1; break;
+                  }
+                  case 'INC': {
+                      if(op1 === 'DPTR') next.DPTR = (next.DPTR + 1) & 0xFFFF;
+                      else setVal(op1, getVal(op1) + 1);
+                      if (op1 === 'A') {
+                        next.PSW = updateParity(next.PSW, next.A);
+                        parityUpdated = true;
+                      }
+                      next.PC++; next.cycles += 1; break;
+                  }
+                  case 'DEC': {
+                      setVal(op1, (getVal(op1) - 1 + 256) & 0xFF);
+                      if (op1 === 'A') {
+                        next.PSW = updateParity(next.PSW, next.A);
+                        parityUpdated = true;
+                      }
+                      next.PC++; next.cycles += 1; break;
+                  }
+                  case 'CPL': {
+                      if (op1.includes('.')) {
+                        const [port, bit] = op1.split('.');
+                        const addr = SFR_MAP[port] || parseValue(port);
+                        const mask = 1 << parseInt(bit);
+                        next.RAM[addr] ^= mask;
+                      } else {
+                        setVal(op1, ~getVal(op1));
+                        if (op1 === 'A') {
+                          next.PSW = updateParity(next.PSW, next.A);
+                          parityUpdated = true;
+                        }
+                      }
+                      next.PC++; next.cycles += 1; break;
+                  }
                   case 'SETB': case 'CLR': if (op1.includes('.')) { const [port, bit] = op1.split('.'); const addr = SFR_MAP[port] || parseValue(port); const mask = 1 << parseInt(bit); next.RAM[addr] = line.mnemonic === 'SETB' ? (next.RAM[addr] | mask) : (next.RAM[addr] & ~mask); } next.PC++; break;
                   case 'SJMP': case 'LJMP': case 'AJMP': const target = labels[op1]; if (target !== undefined) next.PC = target; else throw new Error(`Label ${op1} not found`); next.cycles += 2; break;
                   case 'DJNZ': const v = (getVal(op1) - 1 + 256) & 0xFF; setVal(op1, v); if (v !== 0) { const tgt = labels[op2]; if (tgt !== undefined) next.PC = tgt; else throw new Error(`Label ${op2} not found`); } else { next.PC++; } next.cycles += 2; break;
                   case 'ACALL': case 'LCALL': next.stack.push(next.PC + 1); const callTgt = labels[op1]; if (callTgt !== undefined) next.PC = callTgt; else throw new Error(`Label ${op1} not found`); next.cycles += 2; break;
                   case 'RET': const retAddr = next.stack.pop(); if (retAddr !== undefined) next.PC = retAddr; else next.PC++; next.cycles += 2; break;
                   case 'NOP': default: next.PC++; break;
+              }
+              if (!parityUpdated && next.A !== prev.A) {
+                next.PSW = updateParity(next.PSW, next.A);
               }
           } catch (e) { setErrorMsg(e.message); setIsRunning(false); }
           return next;
