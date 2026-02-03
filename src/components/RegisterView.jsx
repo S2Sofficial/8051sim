@@ -11,6 +11,9 @@ const RegisterView = ({ state, theme }) => {
         P: (state.PSW & 0x01) !== 0,
     };
 
+    const bankOffset = state.PSW & 0x18;
+    const registers = Array.from({ length: 8 }, (_, i) => state.RAM[bankOffset + i] || 0);
+
     return (
         <div className={`grid grid-cols-4 gap-2 text-xs font-mono p-2 rounded border ${theme.card} ${theme.border} ${theme.text}`}>
             <div className="flex flex-col"><span className={theme.textMuted}>A</span><span className={`font-bold ${theme.accent}`}>{state.A.toString(16).toUpperCase().padStart(2,'0')}</span></div>
@@ -21,7 +24,7 @@ const RegisterView = ({ state, theme }) => {
             <div className="flex flex-col"><span className={theme.textMuted}>PSW</span><span>{state.PSW.toString(16).toUpperCase().padStart(2,'0')}</span></div>
             <div className="flex flex-col"><span className={theme.textMuted}>CYCLES</span><span>{state.cycles}</span></div>
             <div className={`col-span-4 h-px ${theme.border.replace('/20', '')} opacity-20 my-1 bg-current`}></div>
-            {state.R.map((r, i) => (
+            {registers.map((r, i) => (
                  <div key={i} className="flex gap-1 items-center justify-between px-1">
                      <span className={theme.textMuted}>R{i}</span>
                      <span className="font-bold">{r.toString(16).toUpperCase().padStart(2,'0')}</span>
