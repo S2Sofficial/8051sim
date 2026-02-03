@@ -9,7 +9,7 @@
 
 Live demo: https://8051sim.vercel.app/
 
-<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/62f004ca-424d-4ec4-a152-1694d6162357" />
+<img width="1919" height="998" alt="image" src="https://github.com/user-attachments/assets/f90f5a27-ae00-475f-8fa8-4b58836a7d53" />
 
 
 8051.sim is a browser-based 8051 microcontroller simulator intended for Electronics and Communication Engineering students, educators, and embedded systems learners.  
