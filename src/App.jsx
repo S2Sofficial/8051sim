@@ -17,7 +17,7 @@ export default function App() {
   const [hasStarted, setHasStarted] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('8051_theme');
-    return saved ? JSON.parse(saved) : true;
+    return saved ? JSON.parse(saved) : false;
   });
   const theme = isDarkMode ? THEMES.dark : THEMES.light;
 
@@ -590,7 +590,7 @@ export default function App() {
 
       <SnippetsModal isOpen={showSnippets} onClose={() => setShowSnippets(false)} isDark={isDarkMode} />
 
-      <main className="flex-1 overflow-hidden p-2 lg:p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <main className="flex-1 overflow-y-auto lg:overflow-hidden p-2 lg:p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <CodeEditor
           initialCode={codeRef.current}
           onCodeChange={handleCodeChange}
@@ -602,7 +602,7 @@ export default function App() {
 
         <div className="flex flex-col gap-4 overflow-hidden h-[50vh] lg:h-auto">
             {view === 'sim' && (
-                <div className="flex-1 flex flex-col gap-4 overflow-hidden">
+                <div className="flex-1 flex flex-col gap-4 overflow-visible lg:overflow-hidden">
                     <div className={`p-2 text-xs font-bold rounded flex items-center gap-2 justify-center transition-colors ${isModified ? theme.statusWarn : `${theme.header} ${theme.textMuted}`}`}>
                         {isModified ? <><AlertCircle className="w-4 h-4"/> CODE CHANGED - PRESS RESET TO RELOAD</> : <><CheckCircle className="w-4 h-4"/> SIMULATOR READY - PRESS RUN OR STEP</>}
                     </div>
@@ -611,7 +611,7 @@ export default function App() {
                         <RegisterView state={cpu} theme={theme} />
                     </div>
                     <div className={`${theme.card} rounded-lg shadow p-3 border ${theme.border} shrink-0`}>
-                        <div className={`text-xs font-bold ${theme.panelHeader} mb-2 flex items-center gap-2`}><Activity className="w-3 h-3"/> SERIAL BUFFER</div>
+                        <div className={`text-xs font-bold ${theme.panelHeader} mb-2 flex items-center gap-2`}><Activity className="w-3 h-3"/> SERIAL BUFFER <span className="italic text-[10px]">(Under development)</span></div>
                         <div className="flex items-center gap-2 mb-2">
                             <input
                               value={serialInput}
