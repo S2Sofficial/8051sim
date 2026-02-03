@@ -600,7 +600,7 @@ export default function App() {
           errorMsg={errorMsg}
         />
 
-        <div className="flex flex-col gap-4 overflow-hidden h-[50vh] lg:h-auto">
+        <div className="flex flex-col gap-4 overflow-visible lg:overflow-hidden h-auto lg:h-auto">
             {view === 'sim' && (
                 <div className="flex-1 flex flex-col gap-4 overflow-visible lg:overflow-hidden">
                     <div className={`p-2 text-xs font-bold rounded flex items-center gap-2 justify-center transition-colors ${isModified ? theme.statusWarn : `${theme.header} ${theme.textMuted}`}`}>
