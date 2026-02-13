@@ -12,6 +12,8 @@ import RegisterView from './components/RegisterView';
 import TraceView from './components/TraceView';
 import GPIOView from './components/GPIOView';
 import SnippetsModal from './components/SnippetModal';
+import AuthUI from './components/AuthUI';
+import ResetDialog from './components/ResetDialog';
 
 export default function App() {
   const [hasStarted, setHasStarted] = useState(false);
@@ -33,6 +35,8 @@ export default function App() {
   const [hexDump, setHexDump] = useState([]);
   const [errorMsg, setErrorMsg] = useState(null);
   const [isModified, setIsModified] = useState(false);
+  const [codeDirty, setCodeDirty] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
   const [showSnippets, setShowSnippets] = useState(false);
   const [traceLog, setTraceLog] = useState([]);
   const [serialLog, setSerialLog] = useState([]);
@@ -73,6 +77,7 @@ export default function App() {
     if (!isModifiedRef.current) {
       isModifiedRef.current = true;
       setIsModified(true);
+      setCodeDirty(true);
     }
   }, []);
   const handleDownload = () => {
@@ -263,6 +268,7 @@ export default function App() {
       setErrorMsg(null);
       isModifiedRef.current = false;
       setIsModified(false);
+      setCodeDirty(false);
   }, []);
 
   const applyTimerTicks = (next, cycles) => {
@@ -371,7 +377,6 @@ export default function App() {
   };
 
   const stepSim = () => {
-      if(isModified) { alert("Code changed. Please Reset simulation."); return; }
       setCpu(prev => {
           if (prev.PC >= parsedLines.length) { setIsRunning(false); return prev; }
           let next = { ...prev, RAM: [...prev.RAM], R: [...prev.R], serialTx: prev.serialTx || { pending: false, remaining: 0 } };
@@ -582,13 +587,25 @@ export default function App() {
                  <div className={`flex items-center gap-1 ${theme.card} p-1 rounded border ${theme.border}`}>
                      <button onClick={resetSim} className={`p-2 rounded ${isModified ? 'text-[#d33682] animate-pulse' : theme.textMuted} ${theme.button}`} title="Reset Simulation"><RotateCcw className="w-4 h-4" /></button>
                      <button onClick={stepSim} className={`p-2 rounded text-[#268bd2] ${theme.button}`} title="Step Forward"><StepForward className="w-4 h-4" /></button>
-                     <button onClick={() => setIsRunning(!isRunning)} className={`p-2 rounded flex items-center gap-2 font-bold text-xs px-3 shadow-sm transition-all ${isRunning ? 'bg-[#b58900] text-white' : `${theme.card} border ${theme.border} text-[#859900] ${theme.button}`}`}>{isRunning ? <><Pause className="w-3 h-3"/> PAUSE</> : <><Play className="w-3 h-3"/> RUN</>}</button>
+                     <button
+                       onClick={() => {
+                         if (codeDirty) {
+                           setShowResetDialog(true);
+                           return;
+                         }
+                         setIsRunning(!isRunning);
+                       }}
+                       className={`p-2 rounded flex items-center gap-2 font-bold text-xs px-3 shadow-sm transition-all ${isRunning ? 'bg-[#b58900] text-white' : `${theme.card} border ${theme.border} text-[#859900] ${theme.button}`}`}
+                     >
+                       {isRunning ? <><Pause className="w-3 h-3"/> PAUSE</> : <><Play className="w-3 h-3"/> RUN</>}
+                     </button>
                  </div>
              )}
         </div>
       </header>
 
       <SnippetsModal isOpen={showSnippets} onClose={() => setShowSnippets(false)} isDark={isDarkMode} />
+      <ResetDialog isOpen={showResetDialog} onClose={() => setShowResetDialog(false)} theme={theme} />
 
       <main className="flex-1 overflow-y-auto lg:overflow-hidden p-2 lg:p-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <CodeEditor
