@@ -1,0 +1,402 @@
+/**
+ * Authentication UI Styles
+ * 
+ * Uses CSS custom properties for theming - can be overridden in main stylesheet.
+ * Default values work for both light and dark modes.
+ */
+
+:root {
+  /* Auth Colors - CSS Variables for Theme Customization */
+  --auth-primary-color: #1f2937;
+  --auth-primary-hover: #111827;
+  --auth-text-color: #ffffff;
+  --auth-border-color: #e5e7eb;
+  --auth-bg-color: #ffffff;
+  --auth-error-bg: #fee2e2;
+  --auth-error-text: #991b1b;
+  --auth-button-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --auth-button-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --auth-avatar-size: 40px;
+  --auth-border-radius: 8px;
+  --auth-transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --auth-primary-color: #1f2937;
+    --auth-primary-hover: #111827;
+    --auth-text-color: #ffffff;
+    --auth-border-color: #374151;
+    --auth-bg-color: #1f2937;
+    --auth-error-bg: #7f1d1d;
+    --auth-error-text: #fecaca;
+  }
+}
+
+/* ============================================================================
+   Sign In Container
+   ============================================================================ */
+
+.auth-signin-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+/* ============================================================================
+   Sign In Button
+   ============================================================================ */
+
+.auth-sign-in-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background-color: var(--auth-primary-color);
+  color: var(--auth-text-color);
+  border: 1px solid var(--auth-border-color);
+  border-radius: var(--auth-border-radius);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--auth-transition);
+  box-shadow: var(--auth-button-shadow);
+  white-space: nowrap;
+}
+
+.auth-sign-in-btn:hover:not(:disabled) {
+  background-color: var(--auth-primary-hover);
+  box-shadow: var(--auth-button-shadow-hover);
+  transform: translateY(-1px);
+}
+
+.auth-sign-in-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--auth-button-shadow);
+}
+
+.auth-sign-in-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auth-sign-in-btn:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   Icon Styles
+   ============================================================================ */
+
+.auth-icon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.auth-icon-spin {
+  animation: auth-spin 1s linear infinite;
+}
+
+@keyframes auth-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Google Sign-in button SVG icon */
+.auth-sign-in-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ============================================================================
+   User Profile
+   ============================================================================ */
+
+.auth-user-profile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.auth-profile-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background-color: var(--auth-bg-color);
+  border: 1px solid var(--auth-border-color);
+  border-radius: var(--auth-border-radius);
+  cursor: pointer;
+  transition: background-color var(--auth-transition);
+}
+
+.auth-profile-container:hover {
+  background-color: #f3f4f6;
+}
+
+@media (prefers-color-scheme: dark) {
+  .auth-profile-container:hover {
+    background-color: #374151;
+  }
+}
+
+.auth-avatar {
+  width: var(--auth-avatar-size);
+  height: var(--auth-avatar-size);
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.auth-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: right;
+  line-height: 1.2;
+}
+
+.auth-user-name {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--auth-primary-color);
+}
+
+@media (prefers-color-scheme: dark) {
+  .auth-user-name {
+    color: #f3f4f6;
+  }
+}
+
+.auth-user-email {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+@media (prefers-color-scheme: dark) {
+  .auth-user-email {
+    color: #9ca3af;
+  }
+}
+
+.auth-menu-toggle {
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--auth-primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color var(--auth-transition);
+}
+
+.auth-menu-toggle:hover {
+  color: var(--auth-primary-hover);
+}
+
+@media (prefers-color-scheme: dark) {
+  .auth-menu-toggle {
+    color: #f3f4f6;
+  }
+
+  .auth-menu-toggle:hover {
+    color: #e5e7eb;
+  }
+}
+
+.auth-menu-dots {
+  display: inline-block;
+  letter-spacing: -2px;
+}
+
+/* ============================================================================
+   Dropdown Menu
+   ============================================================================ */
+
+.auth-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background-color: var(--auth-bg-color);
+  border: 1px solid var(--auth-border-color);
+  border-radius: var(--auth-border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 160px;
+  animation: auth-dropdown-enter var(--auth-transition);
+}
+
+@keyframes auth-dropdown-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color var(--auth-transition), color var(--auth-transition);
+  border-radius: var(--auth-border-radius);
+  margin: 4px;
+  width: calc(100% - 8px);
+}
+
+.auth-logout-btn:hover:not(:disabled) {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+@media (prefers-color-scheme: dark) {
+  .auth-logout-btn:hover:not(:disabled) {
+    background-color: #7f1d1d;
+    color: #fecaca;
+  }
+}
+
+.auth-logout-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auth-logout-btn:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+}
+
+/* ============================================================================
+   Error Message
+   ============================================================================ */
+
+.auth-error-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  background-color: var(--auth-error-bg);
+  color: var(--auth-error-text);
+  border-radius: var(--auth-border-radius);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.auth-error-message .auth-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ============================================================================
+   Loading State
+   ============================================================================ */
+
+.auth-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+.auth-loading .auth-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* ============================================================================
+   Responsive Design
+   ============================================================================ */
+
+@media (max-width: 480px) {
+  .auth-user-info {
+    display: none;
+  }
+
+  .auth-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .auth-profile-container {
+    gap: 8px;
+  }
+
+  .auth-sign-in-btn {
+    font-size: 13px;
+    padding: 8px 14px;
+    gap: 8px;
+  }
+
+  .auth-sign-in-btn span {
+    display: none;
+  }
+
+  .auth-sign-in-btn .auth-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* ============================================================================
+   High Contrast Mode Support
+   ============================================================================ */
+
+@media (prefers-contrast: more) {
+  .auth-sign-in-btn,
+  .auth-logout-btn {
+    border-width: 2px;
+  }
+
+  .auth-profile-container {
+    border-width: 2px;
+  }
+}
+
+/* ============================================================================
+   Accessibility: Reduced Motion
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-sign-in-btn,
+  .auth-logout-btn,
+  .auth-profile-container,
+  .auth-icon-spin {
+    animation: none;
+    transition: none;
+  }
+
+  .auth-dropdown-menu {
+    animation: none;
+  }
+}

@@ -575,6 +575,9 @@ export default function App() {
         <div className="flex flex-wrap items-center gap-4 justify-center md:justify-end w-full md:w-auto">
             <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-full ${theme.button} ${theme.textMuted} transition-colors`} title="Toggle Dark Mode">{isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}</button>
             <div className={`flex items-center gap-2 border-r ${theme.border} pr-4`}>
+                <AuthUI theme={theme} />
+            </div>
+            <div className={`flex items-center gap-2 border-r ${theme.border} pr-4`}>
                 <button onClick={() => setShowSnippets(true)} className={`flex items-center gap-2 text-xs font-bold ${theme.textMuted} hover:${theme.highlightText} px-2 py-1 rounded ${theme.button}`}><BookOpen className="w-4 h-4" /> Snippets</button>
                 <button onClick={handleDownload} className={`flex items-center gap-2 text-xs font-bold ${theme.textMuted} hover:${theme.highlightText} px-2 py-1 rounded ${theme.button}`}><Save className="w-4 h-4" /> Save</button>
             </div>
