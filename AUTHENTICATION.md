@@ -1,223 +1,53 @@
-# Google Authentication Implementation Guide
+# Authentication
 
-This document provides complete setup and usage instructions for the Google Authentication system implemented in this project using Firebase Authentication.
+This project uses Clerk for client-side authentication in Vite + React.
 
-## Table of Contents
+## Required Environment Variable
 
-1. [Quick Start](#quick-start)
-2. [Architecture Overview](#architecture-overview)
-3. [File Structure](#file-structure)
-4. [Setup Instructions](#setup-instructions)
-5. [Authentication Flow](#authentication-flow)
-6. [Session Persistence](#session-persistence)
-7. [Protected Features](#protected-features)
-8. [API Reference](#api-reference)
-9. [Firebase Console Configuration](#firebase-console-configuration)
-10. [Security Best Practices](#security-best-practices)
-11. [Troubleshooting](#troubleshooting)
-
----
-
-## Quick Start
-
-### 1. Get Firebase Credentials
-
-1. Go to [Firebase Console](https://console.firebase.google.com)
-2. Create a new project or select an existing one
-3. Enable Google Sign-In in **Authentication > Sign-in method**
-4. Get your configuration from **Project Settings > Your apps**
-
-### 2. Configure Environment Variables
+Create `.env.local` from `.env.example` and set:
 
 ```bash
-# Copy the example environment file
-cp .env.example .env.local
-
-# Fill in your Firebase credentials from the Firebase Console
-VITE_FIREBASE_API_KEY=your_api_key_here
-VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your_project_id
-# ... other variables
+VITE_CLERK_PUBLISHABLE_KEY=your_publishable_key_here
 ```
 
-### 3. Restrict Authorized Domains
+If this key is missing, auth UI degrades gracefully and shows a disabled login state.
 
-⚠️ **Critical Security Step**
+## Integration Points
 
-1. Go to Firebase Console → Authentication → Settings
-2. Under "Authorized domains", add your domain(s):
-   - Production: `yourdomain.com`
-   - Development: `localhost:5173` (for Vite)
-3. **Remove** `localhost:*` and `127.0.0.1:*` from production releases
+- `src/main.jsx`: wraps the app in `ClerkProvider`
+- `src/components/AuthUI.jsx`: renders auth UI (`Show`, `SignInButton`, `UserButton`)
+- `src/components/ProtectedFeature.jsx`: feature gating with Clerk auth state
 
-### 4. Use in Your App
+## Runtime Behavior
 
-The authentication system is now ready. Users will see a "Sign in with Google" button in the header.
+1. App bootstraps with `ClerkProvider` in `main.jsx`.
+2. Header shows login button when signed out.
+3. Signed-in users see profile and menu via `UserButton`.
+4. Protected components use `useAuth()` (`isLoaded`, `isSignedIn`) to gate access.
 
-```jsx
-import { AuthUI } from './components/AuthUI';
+## UI Components Used
 
-// In your component
-<AuthUI />  // Displays sign-in button or user profile
-```
+- `Show`
+- `SignInButton`
+- `UserButton`
+- `useAuth`
+- `useUser`
 
----
+## Troubleshooting
 
-## Architecture Overview
+1. Login button visible but modal does not load:
+Verify `VITE_CLERK_PUBLISHABLE_KEY` and restart dev server.
 
-### Component Hierarchy
+2. Protected content never appears:
+Check `isLoaded` and `isSignedIn` usage in `ProtectedFeature.jsx`.
 
-```
-App
-├── AuthProvider
-│   ├── Header
-│   │   └── AuthUI
-│   │       ├── GoogleSignInButton (unauthenticated)
-│   │       └── UserProfile (authenticated)
-│   ├── Main Content
-│   └── Other Components
-└── LandingPage
-```
+3. App loads without auth features:
+Ensure `ClerkProvider` is present in `src/main.jsx`.
 
-### State Management Flow
+## Security Notes
 
-```
-User Action
-    ↓
-AuthUI Component
-    ↓
-useAuth() Hook
-    ↓
-AuthContext (Auth State)
-    ↓
-Firebase SDK
-    ↓
-onAuthStateChanged Listener
-    ↓
-Context Updates
-    ↓
-Components Re-render
-```
-
-### Data Flow
-
-1. **Initialization**: `main.jsx` calls `initializeFirebase()`
-2. **Setup**: `AuthProvider` wraps application and sets up auth listener
-3. **Auth Change**: User signs in/out, `onAuthStateChanged` fires
-4. **State Update**: Context updates `user`, `isAuthenticated`, `loading`
-5. **Persistence**: Firebase automatically persists session to `localStorage`
-6. **UI Updates**: Components using `useAuth()` re-render with new state
-
----
-
-## File Structure
-
-```
-src/
-├── config/
-│   └── firebase.js              # Firebase initialization & config
-├── context/
-│   └── AuthContext.jsx          # Auth state & provider
-├── components/
-│   ├── AuthUI.jsx               # Sign-in/Profile UI
-│   ├── AuthUI.css               # Auth styling with CSS vars
-│   ├── ProtectedFeature.jsx     # Auth guards & wrappers
-│   └── ProtectedFeature.css     # Guard styling
-├── main.jsx                     # App entry (calls initializeFirebase)
-└── App.jsx                      # Main app (wrapped in AuthProvider)
-
-.env.example                     # Environment template
-.env.local                       # Local env (GITIGNORED)
-```
-
----
-
-## Setup Instructions
-
-### Step 1: Firebase Project Setup
-
-#### Create Firebase Project
-1. Go to [Firebase Console](https://console.firebase.google.com)
-2. Click **Add Project**
-3. Enter project name and click **Create Project**
-4. Wait for project to be created
-
-#### Enable Google Authentication
-1. Navigate to **Authentication** (left sidebar)
-2. Click **Get Started**
-3. Click **Google** provider
-4. Toggle **Enabled**
-5. Select a project support email
-6. Click **Save**
-
-#### Get Configuration
-1. Go to **Project Settings** (gear icon top-left)
-2. Click **Your apps** section
-3. If no app exists, click **Web** to create one
-4. You'll see your Firebase config
-
-```javascript
-// Your config will look like:
-const firebaseConfig = {
-  apiKey: "AIzaSy...",
-  authDomain: "myproject.firebaseapp.com",
-  projectId: "myproject-12345",
-  storageBucket: "myproject-12345.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abc123def456"
-};
-```
-
-### Step 2: Local Development Setup
-
-```bash
-# 1. Copy environment template
-cp .env.example .env.local
-
-# 2. Edit .env.local with your Firebase config
-# (Use your credentials from Step 1)
-
-# 3. Install dependencies (if not done)
-npm install
-
-# 4. Start dev server
-npm run dev
-
-# 5. Visit http://localhost:5173 and test sign-in
-```
-
-### Step 3: Configure Authorized Domains
-
-**For Development (localhost):**
-- Firebase Console → Authentication → Settings → Authorized domains
-- Add: `localhost:5173`
-
-**For Production:**
-- Add your actual domain: `yourdomain.com`
-- **Remove** `localhost:*` before deploying
-
-### Step 4: Deploy
-
-```bash
-# Build
-npm run build
-
-# Deploy to your hosting
-# (Vercel, Netlify, Firebase Hosting, etc.)
-```
-
-**After Deployment:**
-1. Add your production domain to Authorized domains in Firebase Console
-2. Remove any localhost entries
-3. Test authentication on your live site
-
----
-
-## Authentication Flow
-
-### Sign-In Flow (User Perspective)
-
-```
+- Do not commit `.env` or `.env.local`.
+- Only commit placeholder values in `.env.example`.
 User clicks "Sign in with Google"
            ↓
 Google login popup appears
