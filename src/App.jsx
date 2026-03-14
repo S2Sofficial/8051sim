@@ -23,7 +23,10 @@ export default function App() {
   });
   const theme = isDarkMode ? THEMES.dark : THEMES.light;
 
-  useEffect(() => { localStorage.setItem('8051_theme', JSON.stringify(isDarkMode)); }, [isDarkMode]);
+  useEffect(() => {
+    localStorage.setItem('8051_theme', JSON.stringify(isDarkMode));
+    document.documentElement.dataset.theme = isDarkMode ? 'dark' : 'light';
+  }, [isDarkMode]);
 
   const codeRef = useRef(DEFAULT_CODE);
   const isModifiedRef = useRef(false);
@@ -567,43 +570,51 @@ export default function App() {
   if (!hasStarted) return <LandingPage onStart={() => setHasStarted(true)} isDark={isDarkMode} />;
   return (
     <div className={`flex flex-col h-screen lg:h-screen min-h-screen ${theme.bg} ${theme.text} font-sans selection:bg-opacity-30 selection:bg-blue-500`}>
-      <header className={`flex-none p-4 lg:px-6 h-auto lg:h-16 border-b ${theme.border} ${theme.header} flex flex-col md:flex-row items-center justify-between shadow-sm gap-4 z-20`}>
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="w-8 h-8 bg-[#cb4b16] rounded-sm flex items-center justify-center shadow-md"><Cpu className="text-white w-5 h-5" /></div>
-          <h1 className={`text-2xl font-bold tracking-tight ${theme.text} font-mono`}>8051<span className={theme.accent}>.sim</span></h1>
-        </div>
-        <div className="flex flex-wrap items-center gap-4 justify-center md:justify-end w-full md:w-auto">
-            <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-full ${theme.button} ${theme.textMuted} transition-colors`} title="Toggle Dark Mode">{isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}</button>
-            <div className={`flex items-center gap-2 border-r ${theme.border} pr-4`}>
-                <AuthUI theme={theme} />
+      <header className={`flex-none p-4 lg:px-6 border-b ${theme.border} ${theme.header} shadow-sm z-20`}>
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-[#cb4b16] rounded-sm flex items-center justify-center shadow-md"><Cpu className="text-white w-5 h-5" /></div>
+            <h1 className={`text-2xl font-bold tracking-tight ${theme.text} font-mono`}>8051<span className={theme.accent}>.sim</span></h1>
+            <div className="ml-auto flex items-center gap-2 xl:hidden">
+              <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-full ${theme.button} ${theme.textMuted} transition-colors`} title="Toggle Dark Mode">{isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}</button>
+              <AuthUI />
             </div>
-            <div className={`flex items-center gap-2 border-r ${theme.border} pr-4`}>
-                <button onClick={() => setShowSnippets(true)} className={`flex items-center gap-2 text-xs font-bold ${theme.textMuted} hover:${theme.highlightText} px-2 py-1 rounded ${theme.button}`}><BookOpen className="w-4 h-4" /> Snippets</button>
-                <button onClick={handleDownload} className={`flex items-center gap-2 text-xs font-bold ${theme.textMuted} hover:${theme.highlightText} px-2 py-1 rounded ${theme.button}`}><Save className="w-4 h-4" /> Save</button>
+          </div>
+          <div className="flex items-start gap-4 xl:items-center xl:justify-between">
+            <div className="flex min-w-0 flex-1 items-center gap-3 md:gap-4 flex-wrap">
+              <div className={`flex items-center gap-2 border-r ${theme.border} pr-3 md:pr-4`}>
+                  <button onClick={() => setShowSnippets(true)} className={`flex items-center gap-2 text-xs font-bold ${theme.textMuted} hover:${theme.highlightText} px-2 py-1 rounded ${theme.button}`}><BookOpen className="w-4 h-4" /> Snippets</button>
+                  <button onClick={handleDownload} className={`flex items-center gap-2 text-xs font-bold ${theme.textMuted} hover:${theme.highlightText} px-2 py-1 rounded ${theme.button}`}><Save className="w-4 h-4" /> Save</button>
+              </div>
+              <div className={`flex ${theme.card} rounded-md border ${theme.border} overflow-hidden shadow-sm`}>
+                  <button onClick={() => setView('sim')} className={`px-3 py-2 text-xs font-bold flex items-center gap-2 ${view === 'sim' ? theme.select : `hover:${theme.header}`}`}><Zap className="w-3 h-3"/> Simulator</button>
+                  <button onClick={() => setView('trace')} className={`px-3 py-2 text-xs font-bold flex items-center gap-2 ${view === 'trace' ? theme.select : `hover:${theme.header}`}`}><History className="w-3 h-3"/> Trace</button>
+                  <button onClick={() => { setView('hex'); compileHex(); }} className={`px-3 py-2 text-xs font-bold flex items-center gap-2 ${view === 'hex' ? theme.select : `hover:${theme.header}`}`}><Binary className="w-3 h-3"/> Hex</button>
+              </div>
+              {view === 'sim' && (
+                   <div className={`flex items-center gap-1 ${theme.card} p-1 rounded border ${theme.border}`}>
+                       <button onClick={resetSim} className={`p-2 rounded ${isModified ? 'text-[#d33682] animate-pulse' : theme.textMuted} ${theme.button}`} title="Reset Simulation"><RotateCcw className="w-4 h-4" /></button>
+                       <button onClick={stepSim} className={`p-2 rounded text-[#268bd2] ${theme.button}`} title="Step Forward"><StepForward className="w-4 h-4" /></button>
+                       <button
+                         onClick={() => {
+                           if (codeDirty) {
+                             setShowResetDialog(true);
+                             return;
+                           }
+                           setIsRunning(!isRunning);
+                         }}
+                         className={`p-2 rounded flex items-center gap-2 font-bold text-xs px-3 shadow-sm transition-all ${isRunning ? 'bg-[#b58900] text-white' : `${theme.card} border ${theme.border} text-[#859900] ${theme.button}`}`}
+                       >
+                         {isRunning ? <><Pause className="w-3 h-3"/> PAUSE</> : <><Play className="w-3 h-3"/> RUN</>}
+                       </button>
+                   </div>
+               )}
             </div>
-            <div className={`flex ${theme.card} rounded-md border ${theme.border} overflow-hidden shadow-sm`}>
-                <button onClick={() => setView('sim')} className={`px-3 py-2 text-xs font-bold flex items-center gap-2 ${view === 'sim' ? theme.select : `hover:${theme.header}`}`}><Zap className="w-3 h-3"/> Simulator</button>
-                <button onClick={() => setView('trace')} className={`px-3 py-2 text-xs font-bold flex items-center gap-2 ${view === 'trace' ? theme.select : `hover:${theme.header}`}`}><History className="w-3 h-3"/> Trace</button>
-                <button onClick={() => { setView('hex'); compileHex(); }} className={`px-3 py-2 text-xs font-bold flex items-center gap-2 ${view === 'hex' ? theme.select : `hover:${theme.header}`}`}><Binary className="w-3 h-3"/> Hex</button>
+            <div className="hidden xl:flex shrink-0 items-center gap-2">
+              <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2 rounded-full ${theme.button} ${theme.textMuted} transition-colors`} title="Toggle Dark Mode">{isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}</button>
+              <AuthUI />
             </div>
-            {view === 'sim' && (
-                 <div className={`flex items-center gap-1 ${theme.card} p-1 rounded border ${theme.border}`}>
-                     <button onClick={resetSim} className={`p-2 rounded ${isModified ? 'text-[#d33682] animate-pulse' : theme.textMuted} ${theme.button}`} title="Reset Simulation"><RotateCcw className="w-4 h-4" /></button>
-                     <button onClick={stepSim} className={`p-2 rounded text-[#268bd2] ${theme.button}`} title="Step Forward"><StepForward className="w-4 h-4" /></button>
-                     <button
-                       onClick={() => {
-                         if (codeDirty) {
-                           setShowResetDialog(true);
-                           return;
-                         }
-                         setIsRunning(!isRunning);
-                       }}
-                       className={`p-2 rounded flex items-center gap-2 font-bold text-xs px-3 shadow-sm transition-all ${isRunning ? 'bg-[#b58900] text-white' : `${theme.card} border ${theme.border} text-[#859900] ${theme.button}`}`}
-                     >
-                       {isRunning ? <><Pause className="w-3 h-3"/> PAUSE</> : <><Play className="w-3 h-3"/> RUN</>}
-                     </button>
-                 </div>
-             )}
+          </div>
         </div>
       </header>
 

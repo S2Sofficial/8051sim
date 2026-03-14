@@ -6,32 +6,47 @@
  */
 
 :root {
-  /* Auth Colors - CSS Variables for Theme Customization */
-  --auth-primary-color: #1f2937;
-  --auth-primary-hover: #111827;
-  --auth-text-color: #ffffff;
-  --auth-border-color: #e5e7eb;
-  --auth-bg-color: #ffffff;
+  --auth-primary-color: #15314b;
+  --auth-primary-hover: #0e2539;
+  --auth-primary-soft: rgba(21, 49, 75, 0.08);
+  --auth-text-color: #f8fafc;
+  --auth-border-color: rgba(101, 123, 131, 0.2);
+  --auth-bg-color: rgba(255, 255, 255, 0.92);
+  --auth-bg-elevated: rgba(255, 255, 255, 0.98);
+  --auth-surface-muted: #f8f3e3;
+  --auth-heading-color: #22313f;
+  --auth-body-color: #5e7480;
+  --auth-accent-color: #b58900;
+  --auth-accent-soft: rgba(181, 137, 0, 0.14);
   --auth-error-bg: #fee2e2;
   --auth-error-text: #991b1b;
-  --auth-button-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --auth-button-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --auth-button-shadow: 0 14px 34px rgba(15, 23, 42, 0.14);
+  --auth-button-shadow-hover: 0 18px 40px rgba(15, 23, 42, 0.2);
+  --auth-card-shadow: 0 30px 60px rgba(15, 23, 42, 0.2);
   --auth-avatar-size: 40px;
-  --auth-border-radius: 8px;
-  --auth-transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --auth-border-radius: 14px;
+  --auth-card-radius: 24px;
+  --auth-transition: 180ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Dark mode overrides */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --auth-primary-color: #1f2937;
-    --auth-primary-hover: #111827;
-    --auth-text-color: #ffffff;
-    --auth-border-color: #374151;
-    --auth-bg-color: #1f2937;
-    --auth-error-bg: #7f1d1d;
-    --auth-error-text: #fecaca;
-  }
+:root[data-theme='dark'] {
+  --auth-primary-color: #f8c44f;
+  --auth-primary-hover: #ffd873;
+  --auth-primary-soft: rgba(248, 196, 79, 0.14);
+  --auth-text-color: #0f172a;
+  --auth-border-color: rgba(148, 163, 184, 0.22);
+  --auth-bg-color: rgba(15, 23, 42, 0.92);
+  --auth-bg-elevated: rgba(30, 41, 59, 0.98);
+  --auth-surface-muted: #162033;
+  --auth-heading-color: #e2e8f0;
+  --auth-body-color: #94a3b8;
+  --auth-accent-color: #fbbf24;
+  --auth-accent-soft: rgba(251, 191, 36, 0.18);
+  --auth-error-bg: #7f1d1d;
+  --auth-error-text: #fecaca;
+  --auth-button-shadow: 0 16px 36px rgba(2, 6, 23, 0.38);
+  --auth-button-shadow-hover: 0 20px 42px rgba(2, 6, 23, 0.46);
+  --auth-card-shadow: 0 32px 70px rgba(2, 6, 23, 0.5);
 }
 
 /* ============================================================================
@@ -40,9 +55,17 @@
 
 .auth-signin-container {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-direction: row;
+  gap: 8px;
   align-items: center;
+  justify-content: flex-end;
+}
+
+.auth-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 /* ============================================================================
@@ -54,13 +77,16 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
+  min-height: 44px;
   padding: 10px 16px;
-  background-color: var(--auth-primary-color);
+  background:
+    linear-gradient(135deg, var(--auth-primary-color), color-mix(in srgb, var(--auth-primary-color) 82%, black));
   color: var(--auth-text-color);
-  border: 1px solid var(--auth-border-color);
+  border: 1px solid color-mix(in srgb, var(--auth-primary-color) 28%, transparent);
   border-radius: var(--auth-border-radius);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   cursor: pointer;
   transition: all var(--auth-transition);
   box-shadow: var(--auth-button-shadow);
@@ -68,7 +94,8 @@
 }
 
 .auth-sign-in-btn:hover:not(:disabled) {
-  background-color: var(--auth-primary-hover);
+  background:
+    linear-gradient(135deg, var(--auth-primary-hover), color-mix(in srgb, var(--auth-primary-hover) 84%, black));
   box-shadow: var(--auth-button-shadow-hover);
   transform: translateY(-1px);
 }
@@ -139,16 +166,11 @@
   border-radius: var(--auth-border-radius);
   cursor: pointer;
   transition: background-color var(--auth-transition);
+  backdrop-filter: blur(12px);
 }
 
 .auth-profile-container:hover {
-  background-color: #f3f4f6;
-}
-
-@media (prefers-color-scheme: dark) {
-  .auth-profile-container:hover {
-    background-color: #374151;
-  }
+  background-color: var(--auth-bg-elevated);
 }
 
 .auth-avatar {
@@ -171,25 +193,13 @@
   margin: 0;
   font-size: 13px;
   font-weight: 600;
-  color: var(--auth-primary-color);
-}
-
-@media (prefers-color-scheme: dark) {
-  .auth-user-name {
-    color: #f3f4f6;
-  }
+  color: var(--auth-heading-color);
 }
 
 .auth-user-email {
   margin: 0;
   font-size: 12px;
-  color: #6b7280;
-}
-
-@media (prefers-color-scheme: dark) {
-  .auth-user-email {
-    color: #9ca3af;
-  }
+  color: var(--auth-body-color);
 }
 
 .auth-menu-toggle {
@@ -335,6 +345,239 @@
 }
 
 /* ============================================================================
+   Clerk Modal Theme
+   ============================================================================ */
+
+.cl-modalBackdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(181, 137, 0, 0.08), transparent 34%),
+    rgba(15, 23, 42, 0.46);
+  backdrop-filter: blur(8px);
+}
+
+:root[data-theme='dark'] .cl-modalBackdrop {
+  background:
+    radial-gradient(circle at 50% 20%, rgba(251, 191, 36, 0.08), transparent 32%),
+    rgba(2, 6, 23, 0.62);
+}
+
+.cl-modalContent {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  min-height: 100dvh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: clamp(16px, 4vw, 32px) !important;
+  margin: 0 !important;
+}
+
+.cl-cardBox {
+  width: min(100%, 560px) !important;
+  max-width: 560px !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.cl-card {
+  width: 100% !important;
+}
+
+.cl-card {
+  border: 1px solid var(--auth-border-color);
+  border-radius: var(--auth-card-radius);
+  background: var(--auth-bg-elevated);
+  box-shadow: var(--auth-card-shadow);
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+  padding-inline: clamp(20px, 3vw, 34px);
+}
+
+.cl-header {
+  padding-top: 8px;
+  padding-bottom: 10px;
+}
+
+.cl-main {
+  width: 100%;
+}
+
+.cl-headerTitle {
+  color: var(--auth-heading-color);
+  font-size: clamp(1.55rem, 1.3rem + 0.5vw, 1.95rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.cl-headerSubtitle {
+  max-width: 38ch;
+  margin-inline: auto;
+  line-height: 1.5;
+}
+
+.cl-headerSubtitle,
+.cl-footerActionText,
+.cl-formFieldHintText,
+.cl-dividerText,
+.cl-identityPreviewText {
+  color: var(--auth-body-color);
+}
+
+.cl-socialButtonsBlockButton,
+.cl-formFieldInput,
+.cl-identityPreviewEditButton {
+  min-height: 50px;
+  border-radius: 14px;
+  border: 1px solid var(--auth-border-color);
+  background: var(--auth-bg-elevated);
+  box-shadow: none;
+}
+
+.cl-socialButtonsBlockButton:hover,
+.cl-formFieldInput:hover,
+.cl-identityPreviewEditButton:hover {
+  border-color: color-mix(in srgb, var(--auth-accent-color) 50%, var(--auth-border-color));
+  background: color-mix(in srgb, var(--auth-accent-soft) 28%, var(--auth-bg-elevated));
+}
+
+.cl-formFieldLabel,
+.cl-socialButtonsBlockButtonText {
+  color: var(--auth-heading-color);
+  font-weight: 600;
+}
+
+.cl-formFieldInput {
+  color: var(--auth-heading-color);
+}
+
+.cl-formFieldInput::placeholder {
+  color: var(--auth-body-color);
+}
+
+.cl-formFieldRow,
+.cl-formField {
+  margin-bottom: 16px;
+}
+
+.cl-formButtonPrimary {
+  min-height: 52px;
+  border: 1px solid color-mix(in srgb, var(--auth-primary-color) 28%, transparent);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, var(--auth-primary-color), color-mix(in srgb, var(--auth-primary-color) 82%, black));
+  color: var(--auth-text-color);
+  box-shadow: var(--auth-button-shadow);
+  font-weight: 700;
+}
+
+.cl-formButtonPrimary:hover {
+  background:
+    linear-gradient(135deg, var(--auth-primary-hover), color-mix(in srgb, var(--auth-primary-hover) 84%, black));
+  box-shadow: var(--auth-button-shadow-hover);
+}
+
+.cl-dividerLine {
+  background: color-mix(in srgb, var(--auth-border-color) 88%, transparent);
+}
+
+.cl-footer {
+  background: transparent;
+  border-top: 1px solid color-mix(in srgb, var(--auth-border-color) 72%, transparent);
+  padding-bottom: 20px;
+}
+
+.cl-footerActionLink,
+.cl-formResendCodeLink,
+.cl-navbarButton,
+.cl-otpCodeFieldInputShowPasswordButton,
+.cl-identityPreviewEditButton,
+.cl-formFieldAction {
+  color: var(--auth-accent-color);
+}
+
+.cl-footerActionLink:hover,
+.cl-formResendCodeLink:hover,
+.cl-formFieldAction:hover {
+  color: color-mix(in srgb, var(--auth-accent-color) 74%, white);
+}
+
+.cl-userButtonPopoverCard,
+.cl-userPreview,
+.cl-userButtonPopoverActions {
+  background: var(--auth-bg-elevated);
+  border-color: var(--auth-border-color);
+}
+
+.cl-modalCloseButton {
+  border-radius: 14px;
+  border: 1px solid var(--auth-border-color);
+  background: color-mix(in srgb, var(--auth-bg-elevated) 94%, transparent);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+.cl-modalCloseButton:hover {
+  background: var(--auth-bg-elevated);
+}
+
+.cl-signIn-root .cl-cardBox,
+.cl-signUp-root .cl-cardBox {
+  width: min(100%, 680px) !important;
+  max-width: 680px !important;
+}
+
+.cl-signIn-root .cl-card,
+.cl-signUp-root .cl-card {
+  padding-inline: clamp(22px, 2.8vw, 36px);
+  min-height: 540px;
+}
+
+.cl-signIn-root .cl-socialButtonsBlockButton,
+.cl-signUp-root .cl-socialButtonsBlockButton {
+  min-width: 0;
+}
+
+.cl-userProfile-root .cl-cardBox {
+  width: min(100%, 980px) !important;
+  max-width: 980px !important;
+}
+
+.cl-userProfile-root .cl-card {
+  min-height: min(760px, calc(100dvh - 48px));
+}
+
+.cl-userProfile-root .cl-navbar {
+  width: 250px;
+  min-width: 250px;
+  padding: 28px 12px 28px 20px;
+}
+
+.cl-userProfile-root .cl-pageScrollBox {
+  padding: 28px 28px 32px;
+}
+
+.cl-userProfile-root .cl-profilePage,
+.cl-userProfile-root .cl-page {
+  gap: 20px;
+}
+
+.cl-userProfile-root .cl-navbarButton {
+  min-height: 44px;
+  border-radius: 12px;
+  padding-inline: 14px;
+}
+
+.cl-userProfile-root .cl-accordionTriggerButton,
+.cl-userProfile-root .cl-profileSectionPrimaryButton,
+.cl-userProfile-root .cl-profileSectionItem,
+.cl-userProfile-root .cl-badge {
+  border-radius: 12px;
+}
+
+/* ============================================================================
    Responsive Design
    ============================================================================ */
 
@@ -354,17 +597,109 @@
 
   .auth-sign-in-btn {
     font-size: 13px;
-    padding: 8px 14px;
+    min-height: 40px;
+    padding: 8px 12px;
     gap: 8px;
   }
 
-  .auth-sign-in-btn span {
-    display: none;
+  .auth-sign-in-btn .auth-icon {
+    width: 16px;
+    height: 16px;
   }
 
-  .auth-sign-in-btn .auth-icon {
-    width: 20px;
-    height: 20px;
+  .cl-modalContent {
+    padding: 12px !important;
+  }
+
+  .cl-cardBox {
+    width: min(100%, 430px) !important;
+    max-width: 430px !important;
+  }
+
+  .cl-card {
+    border-radius: 18px;
+    padding-inline: 18px;
+  }
+
+  .cl-headerTitle {
+    font-size: 1.65rem;
+  }
+
+  .cl-headerSubtitle {
+    max-width: 30ch;
+  }
+
+  .cl-signIn-root .cl-cardBox,
+  .cl-signUp-root .cl-cardBox,
+  .cl-userProfile-root .cl-cardBox {
+    width: min(100%, 440px) !important;
+    max-width: 440px !important;
+  }
+
+  .cl-signIn-root .cl-card,
+  .cl-signUp-root .cl-card {
+    min-height: min(440px, calc(100dvh - 24px));
+    border-radius: 22px;
+  }
+
+  .cl-userProfile-root .cl-card {
+    min-height: auto;
+  }
+
+  .cl-userProfile-root .cl-navbar {
+    width: 100%;
+    min-width: 0;
+    padding: 16px 12px 10px;
+  }
+
+  .cl-userProfile-root .cl-pageScrollBox {
+    padding: 16px 14px 20px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 900px) {
+  .cl-signIn-root .cl-cardBox,
+  .cl-signUp-root .cl-cardBox {
+    width: min(100%, 580px) !important;
+    max-width: 580px !important;
+  }
+
+  .cl-signIn-root .cl-card,
+  .cl-signUp-root .cl-card {
+    min-height: 500px;
+  }
+
+  .cl-userProfile-root .cl-cardBox {
+    width: min(100%, 720px) !important;
+    max-width: 720px !important;
+  }
+
+  .cl-userProfile-root .cl-navbar {
+    width: 220px;
+    min-width: 220px;
+    padding: 22px 10px 22px 16px;
+  }
+
+  .cl-userProfile-root .cl-pageScrollBox {
+    padding: 22px 22px 26px;
+  }
+}
+
+@media (min-width: 901px) {
+  .cl-signIn-root .cl-cardBox,
+  .cl-signUp-root .cl-cardBox {
+    width: min(100%, 680px) !important;
+    max-width: 680px !important;
+  }
+
+  .cl-signIn-root .cl-card,
+  .cl-signUp-root .cl-card {
+    min-height: 520px;
+  }
+
+  .cl-userProfile-root .cl-cardBox {
+    width: min(100%, 980px) !important;
+    max-width: 980px !important;
   }
 }
 
@@ -391,7 +726,8 @@
   .auth-sign-in-btn,
   .auth-logout-btn,
   .auth-profile-container,
-  .auth-icon-spin {
+  .auth-icon-spin,
+  .cl-formButtonPrimary {
     animation: none;
     transition: none;
   }

@@ -8,11 +8,13 @@ const SnippetsModal = ({ isOpen, onClose, isDark }) => {
     const [selectedCategory, setSelectedCategory] = useState(0);
     const [selectedSnippet, setSelectedSnippet] = useState(SNIPPET_CATEGORIES[0].items[0]);
     const [copiedId, setCopiedId] = useState(null);
+    const [mobilePane, setMobilePane] = useState('code');
 
     useEffect(() => {
         if(isOpen) {
             setSelectedCategory(0);
             setSelectedSnippet(SNIPPET_CATEGORIES[0].items[0]);
+            setMobilePane('code');
         }
     }, [isOpen]);
 
@@ -36,9 +38,15 @@ const SnippetsModal = ({ isOpen, onClose, isDark }) => {
         }
     };
     return (
-        <div className={`fixed inset-0 z-50 flex items-center justify-center ${modalTheme.modalOverlay} p-4`}>
-            <div className={`w-full max-w-4xl rounded-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh] ${modalTheme.bg}`}>
-                <div className={`p-4 border-b flex justify-between items-center ${modalTheme.header} ${modalTheme.border}`}>
+        <div
+            className={`fixed inset-0 z-50 flex items-center justify-center ${modalTheme.modalOverlay} p-3 md:p-4`}
+            onClick={onClose}
+        >
+            <div
+                className={`w-full max-w-4xl rounded-2xl md:rounded-lg shadow-2xl overflow-hidden flex flex-col h-[92vh] md:max-h-[90vh] md:h-auto ${modalTheme.bg}`}
+                onClick={(event) => event.stopPropagation()}
+            >
+                <div className={`p-4 md:p-4 border-b flex justify-between items-center ${modalTheme.header} ${modalTheme.border}`}>
                     <h2 className={`text-lg font-bold flex items-center gap-2 ${modalTheme.text}`}>
                         <BookOpen className="w-5 h-5"/> Code Snippets
                     </h2>
@@ -47,19 +55,39 @@ const SnippetsModal = ({ isOpen, onClose, isDark }) => {
                     </button>
                 </div>
                 
-                <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
-                    <div className={`w-full md:w-64 border-b md:border-b-0 md:border-r overflow-y-auto max-h-40 md:max-h-none ${modalTheme.bg} ${modalTheme.border}`}>
+                <div className={`md:hidden flex items-center gap-2 px-4 py-3 border-b ${modalTheme.header} ${modalTheme.border}`}>
+                    <button
+                        onClick={() => setMobilePane('list')}
+                        className={`flex-1 rounded-lg px-3 py-2 text-sm font-bold transition-colors ${mobilePane === 'list' ? `${modalTheme.select}` : `${modalTheme.textMuted} ${modalTheme.button}`}`}
+                    >
+                        Browse Snippets
+                    </button>
+                    <button
+                        onClick={() => setMobilePane('code')}
+                        className={`flex-1 rounded-lg px-3 py-2 text-sm font-bold transition-colors ${mobilePane === 'code' ? `${modalTheme.select}` : `${modalTheme.textMuted} ${modalTheme.button}`}`}
+                    >
+                        View Code
+                    </button>
+                </div>
+
+                <div className="flex flex-1 overflow-hidden flex-col md:flex-row min-h-0">
+                    <div className={`${mobilePane === 'list' ? 'flex' : 'hidden'} md:flex w-full md:w-64 border-b md:border-b-0 md:border-r overflow-hidden shrink-0 ${modalTheme.bg} ${modalTheme.border} flex-col min-h-0 md:min-h-full max-h-full`}>
+                        <div className="flex-1 min-h-0 max-h-full overflow-y-scroll overscroll-contain [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch]">
                         {SNIPPET_CATEGORIES.map((cat, catIdx) => (
                             <div key={catIdx}>
-                                <div className={`px-3 py-2 text-xs font-bold uppercase tracking-wider ${modalTheme.textMuted} bg-opacity-10 bg-black/5 mt-2 first:mt-0`}>
+                                <div className={`px-3 py-2 text-[11px] md:text-xs font-bold uppercase tracking-wider ${modalTheme.textMuted} bg-opacity-10 bg-black/5 mt-2 first:mt-0`}>
                                     {cat.name}
                                 </div>
                                 <div>
                                     {cat.items.map((snippet) => (
                                         <button 
                                             key={snippet.id}
-                                            onClick={() => setSelectedSnippet(snippet)}
-                                            className={`w-full text-left px-4 py-2 text-sm border-l-2 transition-colors ${selectedSnippet.id === snippet.id ? `border-[#b58900] ${modalTheme.select} font-medium` : `border-transparent ${modalTheme.text} hover:${modalTheme.button.replace('hover:', '')} opacity-80 hover:opacity-100`}`}
+                                            onClick={() => {
+                                                setSelectedSnippet(snippet);
+                                                setSelectedCategory(catIdx);
+                                                setMobilePane('code');
+                                            }}
+                                            className={`w-full text-left px-4 py-3 md:py-2 text-sm border-l-2 transition-colors ${selectedSnippet.id === snippet.id ? `border-[#b58900] ${modalTheme.select} font-medium` : `border-transparent ${modalTheme.text} hover:${modalTheme.button.replace('hover:', '')} opacity-80 hover:opacity-100`}`}
                                         >
                                             {snippet.title}
                                         </button>
@@ -67,24 +95,25 @@ const SnippetsModal = ({ isOpen, onClose, isDark }) => {
                                 </div>
                             </div>
                         ))}
+                        </div>
                     </div>
 
-                    <div className={`flex-1 flex flex-col ${modalTheme.bg} p-0 overflow-hidden relative`}>
-                        <div className={`p-4 border-b ${modalTheme.border} ${modalTheme.header} flex justify-between items-start`}>
-                            <div>
-                                <h3 className={`${modalTheme.accent} font-bold text-xl`}>{selectedSnippet.title}</h3>
-                                <p className={`${modalTheme.textMuted} text-sm mt-1`}>{selectedSnippet.desc}</p>
+                    <div className={`${mobilePane === 'code' ? 'flex' : 'hidden'} md:flex flex-1 flex-col ${modalTheme.bg} p-0 overflow-hidden relative min-h-0`}>
+                        <div className={`p-4 border-b ${modalTheme.border} ${modalTheme.header} flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start`}>
+                            <div className="min-w-0">
+                                <h3 className={`${modalTheme.accent} font-bold text-lg md:text-xl leading-tight`}>{selectedSnippet.title}</h3>
+                                <p className={`${modalTheme.textMuted} text-sm mt-1 leading-6`}>{selectedSnippet.desc}</p>
                             </div>
                             <button 
                                 onClick={() => handleCopy(selectedSnippet.code)}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold transition-all shadow-sm ${copiedId === selectedSnippet.id ? 'bg-green-600 text-white' : `${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-stone-200 hover:bg-stone-300'} ${modalTheme.text}`}`}
+                                className={`self-start sm:self-auto flex items-center gap-2 px-3 py-2 rounded text-xs font-bold transition-all shadow-sm ${copiedId === selectedSnippet.id ? 'bg-green-600 text-white' : `${isDark ? 'bg-slate-700 hover:bg-slate-600' : 'bg-stone-200 hover:bg-stone-300'} ${modalTheme.text}`}`}
                             >
                                 {copiedId === selectedSnippet.id ? <Check className="w-3 h-3"/> : <Copy className="w-3 h-3"/>}
                                 {copiedId === selectedSnippet.id ? "Copied" : "Copy"}
                             </button>
                         </div>
-                        <div className="flex-1 overflow-auto relative p-4">
-                            <div className={`absolute inset-0 p-4 min-h-full ${isDark ? 'bg-[#0f172a]' : 'bg-[#fdf6e3]'}`}>
+                        <div className="flex-1 overflow-auto relative p-3 md:p-4 min-h-0">
+                            <div className={`absolute inset-0 p-3 md:p-4 min-h-full ${isDark ? 'bg-[#0f172a]' : 'bg-[#fdf6e3]'}`}>
                                 <SyntaxHighlighter code={selectedSnippet.code} isDark={isDark} />
                             </div>
                         </div>

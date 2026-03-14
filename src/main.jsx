@@ -2,21 +2,18 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import { AuthProvider } from './context/AuthContext'
-import { initializeFirebase } from './config/firebase'
+import { ClerkProvider } from '@clerk/react'
 
-// Initialize Firebase on app start
-try {
-  initializeFirebase()
-} catch (error) {
-  console.error('Failed to initialize Firebase:', error)
-  // App will still work, but authentication will not be available
-}
+const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AuthProvider>
+    {clerkPublishableKey ? (
+      <ClerkProvider publishableKey={clerkPublishableKey} afterSignOutUrl="/">
+        <App />
+      </ClerkProvider>
+    ) : (
       <App />
-    </AuthProvider>
+    )}
   </StrictMode>,
 )

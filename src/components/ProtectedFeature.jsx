@@ -12,7 +12,7 @@
 
 import React from 'react';
 import { Lock, LogIn } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '@clerk/react';
 import './ProtectedFeature.css';
 
 /**
@@ -33,15 +33,15 @@ export const ProtectedFeature = ({
   showLock = true,
   fallback = null 
 }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
 
   // Show nothing while loading to avoid layout shift
-  if (loading) {
+  if (!isLoaded) {
     return null;
   }
 
   // User is authenticated - show the feature
-  if (isAuthenticated) {
+  if (isSignedIn) {
     return children;
   }
 
@@ -56,7 +56,7 @@ export const ProtectedFeature = ({
       {showLock && <Lock className="protected-feature-icon" size={32} />}
       <h3 className="protected-feature-title">Authentication Required</h3>
       <p className="protected-feature-message">
-        {feature} requires you to be signed in. Please sign in with your Google account to access this feature.
+        {feature} requires you to be signed in.
       </p>
       <div className="protected-feature-hint">
         <LogIn size={16} />
@@ -78,13 +78,13 @@ export const ProtectedFeature = ({
  * @returns {React.ReactElement} Appropriate content based on auth status
  */
 export const AuthGuard = ({ children, fallback = null }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
 
-  if (loading) {
+  if (!isLoaded) {
     return null;
   }
 
-  return isAuthenticated ? children : fallback;
+  return isSignedIn ? children : fallback;
 };
 
 /**
@@ -99,13 +99,13 @@ export const AuthGuard = ({ children, fallback = null }) => {
  * @returns {React.ReactElement} Appropriate content based on auth status
  */
 export const PublicGuard = ({ children, fallback = null }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
 
-  if (loading) {
+  if (!isLoaded) {
     return null;
   }
 
-  return !isAuthenticated ? children : fallback;
+  return !isSignedIn ? children : fallback;
 };
 
 export default ProtectedFeature;
