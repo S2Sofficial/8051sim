@@ -2,6 +2,9 @@
 
 Browser-based 8051 microcontroller simulator for learning and instruction.
 
+<a href="https://8051sim.vercel.app/"><img width="1611" height="1011" alt="image" src="https://github.com/user-attachments/assets/0e973622-9172-4b6b-ba34-9d4944d91d4e" />
+</a>
+
 Live demo: https://8051sim.vercel.app/
 
 ## What It Does
@@ -9,8 +12,13 @@ Live demo: https://8051sim.vercel.app/
 - Simulates core 8051 execution flow in the browser
 - Visualizes register state, internal RAM, GPIO, trace, and hex output
 - Supports step/run workflows for classroom and self-learning use
-- Includes Clerk-based authentication for user access flows
-
+- Accumulator and general-purpose registers (A, R0–R7)
+- Program Counter (PC) and Stack Pointer (SP)
+- Internal RAM read/write (direct and indirect addressing)
+- GPIO simulation (Ports P0–P3)
+- Bit-level port operations
+- Step-friendly execution model
+- Fully browser-based (no installation required)
 ## Quick Start
 
 ```bash
@@ -19,20 +27,6 @@ cd 8051sim
 npm install
 npm run dev
 ```
-
-Open the URL shown by Vite (usually http://localhost:5173 or http://localhost:5174).
-
-## Environment
-
-Copy and configure environment values:
-
-```bash
-cp .env.example .env.local
-```
-
-Required variable:
-
-- `VITE_CLERK_PUBLISHABLE_KEY`
 
 ## Documentation
 
