@@ -19,6 +19,7 @@ Live demo: https://8051sim.vercel.app/
 - Bit-level port operations
 - Step-friendly execution model
 - Fully browser-based (no installation required)
+
 ## Quick Start
 
 ```bash
